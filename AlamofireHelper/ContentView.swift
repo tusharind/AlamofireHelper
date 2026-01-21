@@ -1,24 +1,53 @@
-//
-//  ContentView.swift
-//  AlamofireHelper
-//
-//  Created by Prakhar Jaiswal on 21/01/26.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+
+    @State private var imageURL: URL?
+    @State private var isLoading = false
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            if isLoading {
+                ProgressView("Loading image...")
+                    .foregroundColor(.white)
+
+            } else if let imageURL {
+                Image(uiImage: UIImage(contentsOfFile: imageURL.path)!)
+                    .resizable()
+                    .scaledToFit()
+                    .cornerRadius(20)
+                    .padding()
+
+            } else {
+                Text("Tap to load an image 🖼️")
+                    .foregroundColor(.white)
+            }
         }
-        .padding()
+        .onTapGesture {
+            loadImage()
+        }
+        .onAppear {
+            loadImage()
+        }
+    }
+
+    private func loadImage() {
+        isLoading = true
+
+        ImageService.fetchRandomImage { result in
+            DispatchQueue.main.async {
+                isLoading = false
+                if case .success(let url) = result {
+                    imageURL = url
+                }
+            }
+        }
     }
 }
 
 #Preview {
     ContentView()
 }
+
