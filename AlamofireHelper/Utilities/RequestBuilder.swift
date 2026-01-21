@@ -62,6 +62,18 @@ class RequestBuilder {
         return self
     }
 
+    func executeData(
+        completion: @escaping (Result<Data, Error>) -> Void
+    ) {
+        NetworkManager.requestData(
+            url: url,
+            method: method,
+            parameters: parameters,
+            headers: headers,
+            completion: completion,
+        )
+    }
+
     func execute<T: Decodable>(
         responseType _: T.Type,
         completion: @escaping (Result<T, Error>) -> Void,
@@ -75,18 +87,7 @@ class RequestBuilder {
         )
     }
 
-    func executeWithLogging<T: Decodable>(
-        responseType _: T.Type,
-        completion: @escaping (Result<T, Error>) -> Void,
-    ) {
-        NetworkManager.requestWithLogging(
-            url: url,
-            method: method,
-            parameters: parameters,
-            headers: headers,
-            completion: completion,
-        )
-    }
+    
 
     func buildURLRequest() throws -> URLRequest {
         guard let requestURL = URL(string: url) else {
@@ -104,26 +105,26 @@ class RequestBuilder {
 extension RequestBuilder {
     // Quick GET request
     static func get(url: String) -> RequestBuilder {
-        RequestBuilder(url: url, method: .get)
+        return RequestBuilder(url: url, method: .get)
             .setURLEncoding()
     }
 
     // Quick POST request
     static func post(url: String) -> RequestBuilder {
-        RequestBuilder(url: url, method: .post)
+        return RequestBuilder(url: url, method: .post)
             .setJSONEncoding()
             .setContentType("application/json")
     }
 
     // Quick PUT request
     static func put(url: String) -> RequestBuilder {
-        RequestBuilder(url: url, method: .put)
+        return RequestBuilder(url: url, method: .put)
             .setJSONEncoding()
             .setContentType("application/json")
     }
 
     // Quick DELETE request
     static func delete(url: String) -> RequestBuilder {
-        RequestBuilder(url: url, method: .delete)
+        return RequestBuilder(url: url, method: .delete)
     }
 }

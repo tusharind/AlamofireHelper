@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var imageURL: URL?
+    @State private var imageData: Data?
     @State private var isLoading = false
 
     var body: some View {
@@ -12,8 +12,8 @@ struct ContentView: View {
                 ProgressView("Loading image...")
                     .foregroundColor(.white)
 
-            } else if let imageURL {
-                Image(uiImage: UIImage(contentsOfFile: imageURL.path)!)
+            } else if let imageData, let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFit()
                     .cornerRadius(20)
@@ -38,8 +38,8 @@ struct ContentView: View {
         ImageService.fetchRandomImage { result in
             DispatchQueue.main.async {
                 isLoading = false
-                if case let .success(url) = result {
-                    imageURL = url
+                if case let .success(data) = result {
+                    imageData = data
                 }
             }
         }

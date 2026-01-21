@@ -45,7 +45,7 @@ enum NetworkError: Error {
             "Failed to process response data."
         case .encodingError:
             "Failed to process request data."
-        case let .unknown(message):
+        case .unknown(let message):
             message
         }
     }
@@ -88,7 +88,7 @@ extension NetworkError {
                 return .forbidden
             case 404:
                 return .notFound
-            case 500 ... 599:
+            case 500...599:
                 return .serverError
             default:
                 return .unknown("HTTP Error \(statusCode)")
