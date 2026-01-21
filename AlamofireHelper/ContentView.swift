@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct ContentView: View {
-
     @State private var imageURL: URL?
     @State private var isLoading = false
 
@@ -39,7 +38,7 @@ struct ContentView: View {
         ImageService.fetchRandomImage { result in
             DispatchQueue.main.async {
                 isLoading = false
-                if case .success(let url) = result {
+                if case let .success(url) = result {
                     imageURL = url
                 }
             }
@@ -50,4 +49,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-

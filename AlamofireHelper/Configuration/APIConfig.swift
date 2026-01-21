@@ -7,19 +7,16 @@
 
 import Foundation
 
-// MARK: - Base URL Configuration
-
-struct APIConfig {
+enum APIConfig {
     static var baseURL: String = "https://api.yourapp.com"
 
     static var fullBaseURL: String {
-        return "\(baseURL)/"
+        "\(baseURL)/"
     }
 }
 
-struct APIEndpoints {
-
-    struct Auth {
+enum APIEndpoints {
+    enum Auth {
         static let login = "\(APIConfig.fullBaseURL)/auth/login"
         static let register = "\(APIConfig.fullBaseURL)/auth/register"
         static let logout = "\(APIConfig.fullBaseURL)/auth/logout"
@@ -30,7 +27,7 @@ struct APIEndpoints {
         static let refreshToken = "\(APIConfig.fullBaseURL)/auth/refresh"
     }
 
-    struct User {
+    enum User {
         static let profile = "\(APIConfig.fullBaseURL)/user/profile"
         static let updateProfile =
             "\(APIConfig.fullBaseURL)/user/profile/update"
@@ -39,24 +36,24 @@ struct APIEndpoints {
         static let uploadAvatar = "\(APIConfig.fullBaseURL)/user/avatar"
 
         static func getUserById(id: String) -> String {
-            return "\(APIConfig.fullBaseURL)/user/\(id)"
+            "\(APIConfig.fullBaseURL)/user/\(id)"
         }
     }
 
-    struct Posts {
+    enum Posts {
         static let allPosts = "\(APIConfig.fullBaseURL)/posts"
         static let createPost = "\(APIConfig.fullBaseURL)/posts/create"
 
         static func getPost(id: String) -> String {
-            return "\(APIConfig.fullBaseURL)/posts/\(id)"
+            "\(APIConfig.fullBaseURL)/posts/\(id)"
         }
 
         static func updatePost(id: String) -> String {
-            return "\(APIConfig.fullBaseURL)/posts/\(id)/update"
+            "\(APIConfig.fullBaseURL)/posts/\(id)/update"
         }
 
         static func deletePost(id: String) -> String {
-            return "\(APIConfig.fullBaseURL)/posts/\(id)/delete"
+            "\(APIConfig.fullBaseURL)/posts/\(id)/delete"
         }
     }
 

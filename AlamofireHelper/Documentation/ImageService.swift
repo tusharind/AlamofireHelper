@@ -1,7 +1,6 @@
 import Foundation
 
-struct ImageService {
-
+enum ImageService {
     /// Fetches a random image from Lorem Picsum and returns a local file URL
     static func fetchRandomImage(completion: @escaping (Result<URL, Error>) -> Void) {
         // Random image every time (UUID avoids caching)
@@ -12,4 +11,3 @@ struct ImageService {
         }
     }
 }
-

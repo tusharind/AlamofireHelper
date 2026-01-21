@@ -9,14 +9,13 @@ import Alamofire
 import Foundation
 
 struct AuthInterceptor: RequestInterceptor {
-
     private let accessTokenKey = "accessToken"
     private let refreshTokenKey = "refreshToken"
 
     func adapt(
         _ urlRequest: URLRequest,
-        for session: Session,
-        completion: @escaping (Result<URLRequest, Error>) -> Void
+        for _: Session,
+        completion: @escaping (Result<URLRequest, Error>) -> Void,
     ) {
         var urlRequest = urlRequest
 
@@ -24,7 +23,7 @@ struct AuthInterceptor: RequestInterceptor {
         if let token = getAccessToken() {
             urlRequest.setValue(
                 "Bearer \(token)",
-                forHTTPHeaderField: "Authorization"
+                forHTTPHeaderField: "Authorization",
             )
         }
 
@@ -33,11 +32,10 @@ struct AuthInterceptor: RequestInterceptor {
 
     func retry(
         _ request: Request,
-        for session: Session,
-        dueTo error: Error,
-        completion: @escaping (RetryResult) -> Void
+        for _: Session,
+        dueTo _: Error,
+        completion: @escaping (RetryResult) -> Void,
     ) {
-
         guard let response = request.task?.response as? HTTPURLResponse else {
             completion(.doNotRetry)
             return
@@ -62,7 +60,7 @@ struct AuthInterceptor: RequestInterceptor {
     }
 
     func getAccessToken() -> String? {
-        return UserDefaults.standard.string(forKey: accessTokenKey)
+        UserDefaults.standard.string(forKey: accessTokenKey)
     }
 
     func saveRefreshToken(_ token: String) {
@@ -70,7 +68,7 @@ struct AuthInterceptor: RequestInterceptor {
     }
 
     func getRefreshToken() -> String? {
-        return UserDefaults.standard.string(forKey: refreshTokenKey)
+        UserDefaults.standard.string(forKey: refreshTokenKey)
     }
 
     func clearTokens() {
@@ -79,7 +77,6 @@ struct AuthInterceptor: RequestInterceptor {
     }
 
     private func refreshAccessToken(completion: @escaping (Bool) -> Void) {
-
         guard let refreshToken = getRefreshToken() else {
             completion(false)
             return
@@ -93,19 +90,19 @@ struct AuthInterceptor: RequestInterceptor {
             refreshURL,
             method: .post,
             parameters: parameters,
-            encoding: JSONEncoding.default
+            encoding: JSONEncoding.default,
         )
         .validate()
         .responseDecodable(of: TokenResponse.self) { response in
             switch response.result {
-            case .success(let tokenResponse):
-                self.saveAccessToken(tokenResponse.accessToken)
+            case let .success(tokenResponse):
+                saveAccessToken(tokenResponse.accessToken)
                 if let newRefreshToken = tokenResponse.refreshToken {
-                    self.saveRefreshToken(newRefreshToken)
+                    saveRefreshToken(newRefreshToken)
                 }
                 completion(true)
             case .failure:
-                self.clearTokens()
+                clearTokens()
                 completion(false)
             }
         }
