@@ -8,8 +8,6 @@
 import Alamofire
 import Foundation
 
-// MARK: - Custom Network Errors
-
 enum NetworkError: Error {
     case noInternet
     case timeout
@@ -69,7 +67,7 @@ enum NetworkError: Error {
 
 extension NetworkError {
     static func fromAFError(_ error: AFError) -> NetworkError {
-        // Check for network connectivity
+
         if let underlyingError = error.underlyingError as NSError? {
             if underlyingError.code == NSURLErrorNotConnectedToInternet {
                 return .noInternet
@@ -79,7 +77,6 @@ extension NetworkError {
             }
         }
 
-        // Check response status code
         if let statusCode = error.responseCode {
             switch statusCode {
             case 401:
@@ -95,7 +92,6 @@ extension NetworkError {
             }
         }
 
-        // Check for specific AFError types
         if error.isInvalidURLError {
             return .invalidURL
         }

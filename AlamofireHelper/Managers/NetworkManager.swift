@@ -8,53 +8,50 @@
 import Alamofire
 import Foundation
 
-struct NetworkManager {
-    static let session: Session = {
-        // Basic session configuration
+struct NetworkManager: NetworkServiceProtocol {
+    let session: Session
+
+    init() {
+
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 30
         configuration.timeoutIntervalForResource = 30
 
-        // Create session with auth interceptor
         let interceptor = AuthInterceptor()
-        return Session(configuration: configuration, interceptor: interceptor)
-    }()
-
-    static func request<T: Decodable>(
-        url: String,
-        method: HTTPMethod,
-        parameters: Parameters? = nil,
-        headers: HTTPHeaders? = nil,
-        completion: @escaping (Result<T, Error>) -> Void,
-    ) {
-        session.request(
-            url,
-            method: method,
-            parameters: parameters,
-            headers: headers
+        let logger = NetworkLogger()
+        self.session = Session(
+            configuration: configuration,
+            interceptor: interceptor,
+            eventMonitors: [logger]
         )
-        .validate()
-        .responseDecodable(of: T.self) { response in
-            switch response.result {
-            case .success(let data):
-                completion(.success(data))
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
     }
 
-    static func uploadFile<T: Decodable>(
-        url: String,
+    func request<T: Decodable>(
+        _ endpoint: URLRequestConvertible,
+        completion: @escaping (Result<T, Error>) -> Void
+    ) {
+        session.request(endpoint)
+            .validate()
+            .responseDecodable(of: T.self) { response in
+                switch response.result {
+                case .success(let data):
+                    completion(.success(data))
+                case .failure(let error):
+                    completion(.failure(error))
+                }
+            }
+    }
+
+    func uploadFile<T: Decodable>(
+        _ endpoint: URLRequestConvertible,
         fileData: Data,
         fileName: String,
         mimeType: String,
         parameters: [String: String]? = nil,
-        completion: @escaping (Result<T, Error>) -> Void,
+        completion: @escaping (Result<T, Error>) -> Void
     ) {
         session.upload(
             multipartFormData: { multipartFormData in
-                // Add file
                 multipartFormData.append(
                     fileData,
                     withName: "file",
@@ -62,7 +59,6 @@ struct NetworkManager {
                     mimeType: mimeType
                 )
 
-                // Add other parameters
                 if let parameters {
                     for (key, value) in parameters {
                         if let data = value.data(using: .utf8) {
@@ -71,7 +67,7 @@ struct NetworkManager {
                     }
                 }
             },
-            to: url
+            with: endpoint
         )
         .validate()
         .responseDecodable(of: T.self) { response in
@@ -84,15 +80,15 @@ struct NetworkManager {
         }
     }
 
-    static func downloadFile(
-        url: String,
+    func downloadFile(
+        _ endpoint: URLRequestConvertible,
         destination: DownloadRequest.Destination? = nil,
-        completion: @escaping (Result<URL, Error>) -> Void,
+        completion: @escaping (Result<URL, Error>) -> Void
     ) {
         let finalDestination =
             destination ?? DownloadRequest.suggestedDownloadDestination()
 
-        session.download(url, to: finalDestination)
+        session.download(endpoint, to: finalDestination)
             .validate()
             .response { response in
                 if let error = response.error {
@@ -107,27 +103,19 @@ struct NetworkManager {
             }
     }
 
-    static func requestData(
-        url: String,
-        method: HTTPMethod,
-        parameters: Parameters? = nil,
-        headers: HTTPHeaders? = nil,
-        completion: @escaping (Result<Data, Error>) -> Void,
+    func requestData(
+        _ endpoint: URLRequestConvertible,
+        completion: @escaping (Result<Data, Error>) -> Void
     ) {
-        session.request(
-            url,
-            method: method,
-            parameters: parameters,
-            headers: headers
-        )
-        .validate()
-        .responseData { response in
-            switch response.result {
-            case .success(let data):
-                completion(.success(data))
-            case .failure(let error):
-                completion(.failure(error))
+        session.request(endpoint)
+            .validate()
+            .responseData { response in
+                switch response.result {
+                case .success(let data):
+                    completion(.success(data))
+                case .failure(let error):
+                    completion(.failure(error))
+                }
             }
-        }
     }
 }

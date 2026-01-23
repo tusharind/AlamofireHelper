@@ -9,7 +9,6 @@ import Foundation
 import Network
 
 class NetworkReachability {
-    static let shared = NetworkReachability()
 
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkReachability")
@@ -24,10 +23,9 @@ class NetworkReachability {
         case unknown
     }
 
-    // Callback for network status changes
     var onStatusChange: ((Bool) -> Void)?
 
-    private init() {
+    init() {
         startMonitoring()
     }
 
@@ -37,7 +35,6 @@ class NetworkReachability {
 
             isConnected = path.status == .satisfied
 
-            // Determine connection type
             if path.usesInterfaceType(.wifi) {
                 connectionType = .wifi
             } else if path.usesInterfaceType(.cellular) {
@@ -48,7 +45,6 @@ class NetworkReachability {
                 connectionType = .unknown
             }
 
-            // Notify on main thread
             DispatchQueue.main.async {
                 self.onStatusChange?(self.isConnected)
             }

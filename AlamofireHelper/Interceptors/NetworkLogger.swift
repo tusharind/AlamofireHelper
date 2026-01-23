@@ -8,28 +8,32 @@
 import Alamofire
 import Foundation
 
-enum NetworkLogger {
-    // Enable/disable logging
-    static var isEnabled: Bool = true
+struct NetworkLogger: EventMonitor {
 
-    // MARK: - Log Request
+    var isEnabled: Bool = true
 
-    static func logRequest(_ request: URLRequest?) {
+    let queue = DispatchQueue.main
+
+    init() {
+        print("NetworkLogger initialized")
+    }
+
+    func requestDidResume(_ request: Request) {
         guard isEnabled else { return }
-        guard let request else { return }
 
         print("\n======== REQUEST ========")
-        print("URL: \(request.url?.absoluteString ?? "No URL")")
-        print("Method: \(request.httpMethod ?? "No Method")")
+        print("URL: \(request.request?.url?.absoluteString ?? "No URL")")
+        print("Method: \(request.request?.httpMethod ?? "No Method")")
 
-        if let headers = request.allHTTPHeaderFields, !headers.isEmpty {
+        if let headers = request.request?.allHTTPHeaderFields, !headers.isEmpty
+        {
             print("Headers:")
             for (key, value) in headers {
                 print("  \(key): \(value)")
             }
         }
 
-        if let body = request.httpBody {
+        if let body = request.request?.httpBody {
             if let jsonString = String(data: body, encoding: .utf8) {
                 print("Body: \(jsonString)")
             }
@@ -37,29 +41,29 @@ enum NetworkLogger {
         print("========================\n")
     }
 
-    // MARK: - Log Response
-
-    static func logResponse(_ response: HTTPURLResponse?, data: Data?, error: Error?) {
+    func request<Value>(
+        _ request: DataRequest,
+        didParseResponse response: DataResponse<Value, AFError>
+    ) {
         guard isEnabled else { return }
 
         print("\n======== RESPONSE ========")
 
-        if let response {
-            print("Status Code: \(response.statusCode)")
-            print("URL: \(response.url?.absoluteString ?? "No URL")")
+        if let httpResponse = response.response {
+            print("Status Code: \(httpResponse.statusCode)")
+            print("URL: \(httpResponse.url?.absoluteString ?? "No URL")")
         }
 
-        if let data {
+        if let data = response.data {
             if let jsonString = String(data: data, encoding: .utf8) {
                 print("Data: \(jsonString)")
             }
         }
 
-        if let error {
+        if let error = response.error {
             print("Error: \(error.localizedDescription)")
         }
 
         print("========================\n")
     }
 }
-

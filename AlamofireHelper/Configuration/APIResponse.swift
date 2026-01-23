@@ -26,7 +26,7 @@ struct MessageResponse: Decodable {
 }
 
 struct EmptyResponse: Decodable {
-    // Use when API returns empty response
+
 }
 
 struct PaginatedResponse<T: Decodable>: Decodable {
